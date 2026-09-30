@@ -27,14 +27,14 @@ Currently implementing a CPU framebuffer and basic rendering using SDL3 for wind
 - [x] SDL3 window
 - [x] CPU framebuffer
 - [x] Pixel rendering
-- [ ] Lines
+- [x] Lines
 - [ ] Circles
-- [ ] Triangles
-- [ ] Software rasterizer
+- [x] Triangles
+- [x] Software rasterizer
 - [ ] Vector and matrix mathematics
 - [ ] Physics system
 - [ ] Collision detection
-- [ ] 3D rendering
+- [x] 3D rendering (early)
 - [ ] OpenGL
 - [ ] Shaders
 - [ ] GPU rendering
