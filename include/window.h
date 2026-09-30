@@ -1,6 +1,6 @@
 #pragma once
 
-constexpr int SCALE = 2;
+constexpr int SCALE = 1;
 
 #include <SDL3/SDL.h>
 

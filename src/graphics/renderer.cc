@@ -8,13 +8,17 @@ SDL_Renderer* createRenderer(SDL_Window* window)
 
 SDL_Texture* createTexture(SDL_Renderer* renderer)
 {
-    return SDL_CreateTexture(
+    SDL_Texture* texture = SDL_CreateTexture(
         renderer,
         SDL_PIXELFORMAT_RGBA8888,
         SDL_TEXTUREACCESS_STREAMING,
         WIDTH,
         HEIGHT
     );
+
+    SDL_SetTextureScaleMode(texture, SDL_SCALEMODE_NEAREST);
+
+    return texture;
 }
 
 void updateTexture(
