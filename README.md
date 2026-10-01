@@ -6,42 +6,47 @@ A game engine built from scratch in C++ for learning low-level programming, game
 
 The goal of this project is to understand how game engines work internally by implementing their core systems instead of relying on high-level abstractions.
 
-The project will progressively explore:
+The project progressively explores:
 
-- C++ and memory management
-- Math and linear algebra
-- Software rendering
-- Rasterization
-- Physics and collision detection
-- 2D and 3D graphics
-- OpenGL / GPU programming
-- Shaders
-- Game engine architecture
+* C++ and memory management
+* Mathematics and linear algebra
+* Software rendering
+* Rasterization
+* Physics and collision detection
+* 2D and 3D graphics
+* OpenGL and GPU programming
+* Shaders
+* Game engine architecture
 
-## Current state
+## Current State
 
-Currently implementing a CPU framebuffer and basic rendering using SDL3 for window creation and presentation.
+The engine currently includes an SDL3 window, a CPU framebuffer, basic rasterization, and early 3D rendering.
+
+Current implemented systems include:
+
+* SDL3 window
+* CPU framebuffer
+* Pixel rendering
+* Line rasterization
+* Triangle rasterization
+* Software rasterizer
+* Early 3D rendering
+* OBJ model loading
+
+Development is currently focused on building the mathematical and rendering foundations required for the physics and engine systems.
 
 ## Roadmap
 
-- [x] SDL3 window
-- [x] CPU framebuffer
-- [x] Pixel rendering
-- [x] Lines
-- [ ] Circles
-- [x] Triangles
-- [x] Software rasterizer
-- [ ] Vector and matrix mathematics
-- [ ] Physics system
-- [ ] Collision detection
-- [x] 3D rendering (early)
-- [ ] OpenGL
-- [ ] Shaders
-- [ ] GPU rendering
-- [ ] Game engine systems
+The project is being developed progressively, from low-level mathematics and software rendering to physics simulation, GPU rendering, and engine architecture.
+
+See the complete roadmap:
+
+**[View the full roadmap](https://github.com/S4LPICON/physics-engine-from-scratch/blob/main/ROADMAP.md)**
 
 ## Philosophy
 
 The purpose of this project is not to create a production-ready engine.
 
 It is an educational project focused on understanding what happens underneath the abstractions normally provided by game engines and graphics libraries.
+
+Rather than relying on existing engine systems, the project implements core concepts from scratch whenever practical, using external libraries primarily for platform-level functionality such as window creation and presentation.
