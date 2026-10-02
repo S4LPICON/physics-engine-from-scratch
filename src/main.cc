@@ -9,7 +9,7 @@
 #include "renderer3d.h"
 
 #include "rasterizer.h"
-
+#include "time/time.h"
 #include "input.h"
 
 
@@ -58,16 +58,37 @@ int main()
     SDL_Window* window = createWindow();
     SDL_Renderer* renderer = createRenderer(window);
     SDL_Texture* texture = createTexture(renderer);
+
     Mesh model = loadModel("assets/cat.obj");
     Input input;
+    Transform transform;
+
+    transform.position = {0.0f, 0.0f, 300.0f};
+    transform.rotation = {0.0f, 0.5f, 0.0f};
+    transform.scale = {2.0f, 2.0f, 2.0f};
+
     while (processEvents())
     {
-        if (input.isKeyDown(Key::W)) {
-            std::cout << "Estas presionando: W\n";
+        Time::update();
+
+        if (input.isKeyDown(Key::A))
+        {
+            transform.position.x -= 1.0f;
         }
 
-        if (input.isKeyDown(Key::A)) {
-            std::cout << "Estas presionando: A\n";
+        if (input.isKeyDown(Key::D))
+        {
+            transform.position.x += 1.0f;
+        }
+
+        if (input.isKeyDown(Key::W))
+        {
+            transform.position.z -= 1.0f;
+        }
+
+        if (input.isKeyDown(Key::S))
+        {
+            transform.position.z += 1.0f;
         }
 
         clearFramebuffer(0x000000FF);
@@ -75,9 +96,11 @@ int main()
         drawTriangle(near, 0xFFFFFFFF);
         drawTriangle(far, 0x00FF22FF);
 
-        debug(model);
+        //debug(model);
+        
+        transform.rotation.y += 2.0f * Time::deltaTime();
+        renderMesh3D(model, transform);
 
-        renderMesh3D(model);
 
         updateTexture(texture, framebuffer);
         drawFramebuffer(renderer, texture);
