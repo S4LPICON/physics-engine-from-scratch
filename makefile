@@ -12,6 +12,7 @@ SOURCES = \
     src/events/events.cc \
     src/graphics/renderer3d.cc \
     src/graphics/rasterizer.cc \
+    src/input/input.cc \
     src/tools/obj_loader.cc
 
 build/physics: $(SOURCES)

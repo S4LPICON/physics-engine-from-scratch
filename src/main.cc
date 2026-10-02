@@ -10,6 +10,8 @@
 
 #include "rasterizer.h"
 
+#include "input.h"
+
 
 Triangle near{
     {500, 300, 100.0f},
@@ -23,28 +25,8 @@ Triangle far{
     {300, 500, 200.0f}
 };
 
-
-int main()
+void debug(const Mesh& cube)
 {
-    SDL_Init(SDL_INIT_VIDEO);
-
-    SDL_Window* window = createWindow();
-    SDL_Renderer* renderer = createRenderer(window);
-    SDL_Texture* texture = createTexture(renderer);
-    std::cout << "intentando cargar modelo";
-    Mesh cube = OBJLoader::load("assets/cat.obj");
-    std::cout << "modelo cargado";
-
-    while (processEvents())
-    {
-        clearFramebuffer(0x000000FF);
-        
-        drawTriangle(near, 0xFFFFFFFF);
-        drawTriangle(far, 0x00FF22FF);
-        
-        
-        
-        renderMesh3D(cube);
         std::cout << "Vertices: " << cube.vertices.size() << '\n';
         std::cout << "Triangles: " << cube.triangles.size() << '\n';
 
@@ -58,6 +40,44 @@ int main()
 
         std::cout << "Z min: " << minZ << '\n';
         std::cout << "Z max: " << maxZ << '\n';
+
+}
+
+Mesh loadModel(const std::string& path) 
+{
+    std::cout << "Intentando cargar modelo " << path << '\n';
+
+    return OBJLoader::load(path);
+}
+
+
+int main()
+{
+    SDL_Init(SDL_INIT_VIDEO);
+
+    SDL_Window* window = createWindow();
+    SDL_Renderer* renderer = createRenderer(window);
+    SDL_Texture* texture = createTexture(renderer);
+    Mesh model = loadModel("assets/cat.obj");
+    Input input;
+    while (processEvents())
+    {
+        if (input.isKeyDown(Key::W)) {
+            std::cout << "Estas presionando: W\n";
+        }
+
+        if (input.isKeyDown(Key::A)) {
+            std::cout << "Estas presionando: A\n";
+        }
+
+        clearFramebuffer(0x000000FF);
+
+        drawTriangle(near, 0xFFFFFFFF);
+        drawTriangle(far, 0x00FF22FF);
+
+        debug(model);
+
+        renderMesh3D(model);
 
         updateTexture(texture, framebuffer);
         drawFramebuffer(renderer, texture);
