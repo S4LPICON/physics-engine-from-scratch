@@ -35,7 +35,7 @@ The project is developed progressively, starting from low-level mathematics and 
 * [ ] Model transformations
 * [ ] View transformations
 * [ ] Perspective projection
-* [ ] Depth buffer
+* [x] Depth buffer
 * [x] Backface culling
 * [ ] Clipping
 * [x] Mesh representation
