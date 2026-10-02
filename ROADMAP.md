@@ -36,11 +36,11 @@ The project is developed progressively, starting from low-level mathematics and 
 * [ ] View transformations
 * [ ] Perspective projection
 * [ ] Depth buffer
-* [ ] Backface culling
+* [x] Backface culling
 * [ ] Clipping
-* [ ] Mesh representation
+* [x] Mesh representation
 * [ ] Indexed geometry
-* [ ] OBJ loading
+* [x] OBJ loading
 * [ ] Vertex normals
 * [ ] UV coordinates
 * [ ] Basic software lighting
