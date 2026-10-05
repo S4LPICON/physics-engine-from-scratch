@@ -11,6 +11,7 @@
 #include "rasterizer.h"
 #include "time/time.h"
 #include "input.h"
+#include "camera/camera.h"
 
 
 Triangle near{
@@ -59,13 +60,23 @@ int main()
     SDL_Renderer* renderer = createRenderer(window);
     SDL_Texture* texture = createTexture(renderer);
 
-    Mesh model = loadModel("assets/cat.obj");
+    Mesh model = loadModel("assets/pollo.obj");
     Input input;
     Transform transform;
 
-    transform.position = {0.0f, 0.0f, 300.0f};
+    transform.position = {0.0f, 0.0f, 0.0f};
     transform.rotation = {0.0f, 0.5f, 0.0f};
     transform.scale = {2.0f, 2.0f, 2.0f};
+
+    Camera camera;
+
+
+    camera.fov = 70.0f;
+    camera.aspectRatio = 1280.0f / 720.0f;
+    camera.nearPlane = 0.1f;
+    camera.farPlane = 1000.0f;
+
+    float movementDt = 1;
 
     while (processEvents())
     {
@@ -73,33 +84,33 @@ int main()
 
         if (input.isKeyDown(Key::A))
         {
-            transform.position.x -= 1.0f;
+            transform.position.x -= movementDt;
         }
 
         if (input.isKeyDown(Key::D))
         {
-            transform.position.x += 1.0f;
+            transform.position.x += movementDt;
         }
 
         if (input.isKeyDown(Key::W))
         {
-            transform.position.z -= 1.0f;
+            transform.position.z -= movementDt;
         }
 
         if (input.isKeyDown(Key::S))
         {
-            transform.position.z += 1.0f;
+            transform.position.z += movementDt;
         }
 
-        clearFramebuffer(0x000000FF);
+        clearFramebuffer(0xFFFFFFFF);
 
-        drawTriangle(near, 0xFFFFFFFF);
-        drawTriangle(far, 0x00FF22FF);
+        //drawTriangle(near, 0xFFFFFFFF);
+        //drawTriangle(far, 0x00FF22FF);
 
         //debug(model);
         
         transform.rotation.y += 2.0f * Time::deltaTime();
-        renderMesh3D(model, transform);
+        renderMesh3D(model, transform, camera);
 
 
         updateTexture(texture, framebuffer);

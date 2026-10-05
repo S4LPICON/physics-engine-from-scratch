@@ -3,10 +3,16 @@
 #include "rasterizer.h"
 #include "framebuffer.h"
 #include "transform.h"
+#include "camera/camera.h"
 
-void renderMesh3D(const Mesh& mesh, const Transform& transform)
+void renderMesh3D(
+    const Mesh& mesh,
+    const Transform& transform,
+    const Camera& camera)
 {
     Mat4 modelMatrix = transform.getMatrix();
+    Mat4 viewMatrix = camera.getViewMatrix();
+    Mat4 projectionMatrix = camera.getProjectionMatrix();
 
     for (const Triangle3D& triangle : mesh.triangles)
     {
@@ -34,25 +40,35 @@ void renderMesh3D(const Mesh& mesh, const Transform& transform)
         Vec4 cWorld =
             modelMatrix * Vec4(Vec3{c.x, c.y, c.z}, 1.0f);
 
+        // World space -> View space
+        Vec4 aView = viewMatrix * aWorld;
+        Vec4 bView = viewMatrix * bWorld;
+        Vec4 cView = viewMatrix * cWorld;
+
         // Near clipping básico
-        if (aWorld.z <= 1.0f ||
-            bWorld.z <= 1.0f ||
-            cWorld.z <= 1.0f)
+        if (aView.z >= -camera.nearPlane ||
+            bView.z >= -camera.nearPlane ||
+            cView.z >= -camera.nearPlane)
         {
             continue;
         }
 
-        // 3D -> perspectiva
-        float ax = aWorld.x / aWorld.z;
-        float ay = aWorld.y / aWorld.z;
+        // View space -> Clip space
+        Vec4 aClip = projectionMatrix * aView;
+        Vec4 bClip = projectionMatrix * bView;
+        Vec4 cClip = projectionMatrix * cView;
 
-        float bx = bWorld.x / bWorld.z;
-        float by = bWorld.y / bWorld.z;
+        // Perspective divide
+        float ax = aClip.x / aClip.w;
+        float ay = aClip.y / aClip.w;
 
-        float cx = cWorld.x / cWorld.z;
-        float cy = cWorld.y / cWorld.z;
+        float bx = bClip.x / bClip.w;
+        float by = bClip.y / bClip.w;
 
-        // [-1, 1] -> pantalla
+        float cx = cClip.x / cClip.w;
+        float cy = cClip.y / cClip.w;
+
+        // NDC [-1, 1] -> Screen
         float p1ScreenX =
             (ax + 1.0f) * 0.5f * WIDTH;
 
@@ -84,24 +100,31 @@ void renderMesh3D(const Mesh& mesh, const Transform& transform)
             continue;
         }
 
+        // Depth
+        float depthA = -aView.z;
+        float depthB = -bView.z;
+        float depthC = -cView.z;
+
         Triangle t{
             {
                 static_cast<int>(p1ScreenX),
                 static_cast<int>(p1ScreenY),
-                aWorld.z
+                depthA
             },
+
             {
                 static_cast<int>(p2ScreenX),
                 static_cast<int>(p2ScreenY),
-                bWorld.z
+                depthB
             },
+
             {
                 static_cast<int>(p3ScreenX),
                 static_cast<int>(p3ScreenY),
-                cWorld.z
+                depthC
             }
         };
 
-        drawTriangle(t, 0xbbff00ff);
+        drawTriangle(t, 0xff0000ff);
     }
 }

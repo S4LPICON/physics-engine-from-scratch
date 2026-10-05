@@ -14,6 +14,7 @@ SOURCES = \
     src/graphics/rasterizer.cc \
     src/input/input.cc \
     src/time/time.cc \
+    src/camera/camera.cc \
     src/tools/obj_loader.cc
 
 build/physics: $(SOURCES)
