@@ -1,7 +1,7 @@
 
 #include <limits>
 
-#include "framebuffer.h"
+#include "graphics/framebuffer.h"
 
 uint32_t framebuffer[WIDTH * HEIGHT];
 float zbuffer[WIDTH * HEIGHT];

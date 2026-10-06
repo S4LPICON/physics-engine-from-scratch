@@ -1,4 +1,4 @@
-#include "events.h"
+#include "events/events.h"
 
 #include <SDL3/SDL.h>
 

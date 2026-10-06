@@ -1,5 +1,5 @@
-#include "renderer.h"
-#include "framebuffer.h"
+#include "graphics/renderer.h"
+#include "graphics/framebuffer.h"
 
 SDL_Renderer* createRenderer(SDL_Window* window)
 {

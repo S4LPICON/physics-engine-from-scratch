@@ -1,5 +1,5 @@
-#include "window.h"
-#include "framebuffer.h"
+#include "graphics/window.h"
+#include "graphics/framebuffer.h"
 
 SDL_Window* createWindow()
 {
