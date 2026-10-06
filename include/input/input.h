@@ -9,7 +9,12 @@ enum class Key {
     D,
     Space,
     Escape,
-    Q
+    Q,
+    Left,
+    Right,
+    Up,
+    Down,
+    Shift
 };
 
 class Input {
