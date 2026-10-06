@@ -6,14 +6,14 @@ The project is developed progressively, starting from low-level mathematics and 
 
 * [x] C++ project structure
 * [x] SDL3 window
-* [ ] RAII and resource management
-* [ ] Vector2
-* [ ] Vector3
-* [ ] Matrix3
-* [ ] Matrix4
-* [ ] Transform
+* [x] RAII and resource management
+* [x] Vector2
+* [x] Vector3
+* [x] Matrix3
+* [x] Matrix4
+* [x] Transform
 * [ ] Quaternion
-* [ ] Time management
+* [x] Time management
 
 ## Phase 2 — CPU Renderer
 
@@ -25,24 +25,24 @@ The project is developed progressively, starting from low-level mathematics and 
 * [ ] Circle rasterization
 * [ ] Rectangle rasterization
 * [x] Triangle rasterization
-* [ ] Triangle interpolation
+* [x] Triangle interpolation
 * [ ] Alpha blending
-* [ ] Texture sampling
+* [x] Texture sampling
 
 ### 3D
 
 * [x] Basic 3D rendering
-* [ ] Model transformations
-* [ ] View transformations
-* [ ] Perspective projection
+* [x] Model transformations
+* [x] View transformations
+* [x] Perspective projection
 * [x] Depth buffer
 * [x] Backface culling
-* [ ] Clipping
+* [x] Clipping
 * [x] Mesh representation
-* [ ] Indexed geometry
+* [x] Indexed geometry
 * [x] OBJ loading
-* [ ] Vertex normals
-* [ ] UV coordinates
+* [x] Vertex normals
+* [x] UV coordinates
 * [ ] Basic software lighting
 
 ## Phase 3 — Physics 2D
