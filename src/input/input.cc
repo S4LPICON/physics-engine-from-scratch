@@ -1,4 +1,4 @@
-#include "input.h"
+#include "input/input.h"
 
 bool Input::isKeyDown(Key key) const {
     const bool* keyboardState = SDL_GetKeyboardState(nullptr);
@@ -14,6 +14,7 @@ SDL_Scancode Input::toSDLScancode(Key key) const {
         case Key::D:      return SDL_SCANCODE_D;
         case Key::Space:  return SDL_SCANCODE_SPACE;
         case Key::Escape: return SDL_SCANCODE_ESCAPE;
+        case Key::Q:       return SDL_SCANCODE_Q;
     }
 
     return SDL_SCANCODE_UNKNOWN;
