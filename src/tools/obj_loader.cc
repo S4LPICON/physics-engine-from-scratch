@@ -70,7 +70,7 @@ Mesh OBJLoader::load(const std::string& path)
     Mesh mesh;
     std::string line;
 
-    // buffers temporales para almacenar posiciones y UVs suelts
+    // buffers temporales para almacenar posiciones y UVs sueltas
     std::vector<Vec3Raw> tempPositions;
     std::vector<Vec2Raw> tempUVs;
 
@@ -92,28 +92,37 @@ Mesh OBJLoader::load(const std::string& path)
             ss >> pos.x >> pos.y >> pos.z;
             tempPositions.push_back(pos);
         }
-
         else if (type == "vt")
         {
             Vec2Raw uv;
             ss >> uv.u >> uv.v;
             tempUVs.push_back(uv);
         }
-        //cara Triangular (f)
+        // cara (f) - soporta triangulos (3), cuadrilateros (4) o n-poligonos
         else if (type == "f")
         {
-            std::string tokens[3];
-            ss >> tokens[0] >> tokens[1] >> tokens[2];
+            std::vector<std::string> faceTokens;
+            std::string token;
 
-            Triangle3D triangle;
-            int triangleIndices[3];
+            // leer TODOS los tokens de la cara presentes en la línea
+            while (ss >> token) {
+                faceTokens.push_back(token);
+            }
 
-            for (int i = 0; i < 3; ++i)
+            if (faceTokens.size() < 3) {
+                continue; // cara invalida
+            }
+
+            std::vector<int> faceIndices;
+            faceIndices.reserve(faceTokens.size());
+
+            // procesar cada vertice de la cara
+            for (const std::string& t : faceTokens)
             {
                 int vIdx = -1;
                 int vtIdx = -1;
 
-                parseFaceToken(tokens[i], vIdx, vtIdx);
+                parseFaceToken(t, vIdx, vtIdx);
 
                 if (vIdx < -1)  vIdx += static_cast<int>(tempPositions.size()) + 1;
                 if (vtIdx < -1) vtIdx += static_cast<int>(tempUVs.size()) + 1;
@@ -123,13 +132,12 @@ Mesh OBJLoader::load(const std::string& path)
                 auto it = vertexCache.find(lookupKey);
                 if (it != vertexCache.end())
                 {
-                    triangleIndices[i] = it->second;
+                    faceIndices.push_back(it->second);
                 }
                 else
                 {
-
                     Vertex3D newVertex{};
-                    
+
                     if (vIdx >= 0 && static_cast<size_t>(vIdx) < tempPositions.size()) {
                         newVertex.x = tempPositions[vIdx].x;
                         newVertex.y = tempPositions[vIdx].y;
@@ -145,21 +153,46 @@ Mesh OBJLoader::load(const std::string& path)
                     mesh.vertices.push_back(newVertex);
                     vertexCache[lookupKey] = newIndex;
 
-                    triangleIndices[i] = newIndex;
+                    faceIndices.push_back(newIndex);
                 }
             }
 
-            triangle.a = triangleIndices[0];
-            triangle.b = triangleIndices[1];
-            triangle.c = triangleIndices[2];
+            // triangulacion en abanico (Triangle Fan):
+            // si la cara tiene 3 vertices (v0, v1, v2) -> genera 1 triangulo (0, 1, 2)
+            // si la cara tiene 4 vetices (v0, v1, v2, v3) -> genenra 2 triangulos (0, 1, 2) y (0, 2, 3)
+            for (size_t i = 1; i + 1 < faceIndices.size(); ++i) {
+                Triangle3D triangle;
+                triangle.a = faceIndices[0];
+                triangle.b = faceIndices[i];
+                triangle.c = faceIndices[i + 1];
 
-            mesh.triangles.push_back(triangle);
+                mesh.triangles.push_back(triangle);
+            }
         }
     }
 
     std::cout << "[OBJLoader] " << path << " cargado exitosamente: "
-              << mesh.vertices.size() << " vertices unificados, "
-              << mesh.triangles.size() << " triangulos.\n";
+              << mesh.vertices.size() << " vértices unificados, "
+              << mesh.triangles.size() << " triángulos.\n";
+
+    return mesh;
+}
+
+/**
+ * @brief Carga un modelo 3D con manejo de errores y reporte en consola.
+ */
+Mesh loadModelSafe(const std::string& path) 
+{
+    std::cout << "[INFO] Cargando modelo 3D desde: " << path << "...\n";
+    Mesh mesh = OBJLoader::load(path);
+
+    if (mesh.vertices.empty() || mesh.triangles.empty()) {
+        std::cerr << "[ERROR] Fallo al cargar el modelo o archivo vacío: " << path << '\n';
+    } else {
+        std::cout << "[INFO] Modelo cargado exitosamente. Vértices: " 
+                  << mesh.vertices.size() << " | Triángulos: " 
+                  << mesh.triangles.size() << '\n';
+    }
 
     return mesh;
 }
