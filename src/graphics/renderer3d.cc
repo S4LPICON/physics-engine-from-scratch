@@ -1,130 +1,207 @@
-#include "renderer3d.h"
+#include "graphics/renderer3d.h"
 
-#include "rasterizer.h"
-#include "framebuffer.h"
-#include "transform.h"
+#include "graphics/rasterizer.h"
+#include "graphics/framebuffer.h"
+#include "geometry/transform.h"
 #include "camera/camera.h"
+#include "math/vec2.h"
+
+#include <vector>
+#include <algorithm>
+#include <cmath>
+
+namespace {
+
+struct ScreenVertex {
+    Vec2 position;
+    float depthNDC;
+    float invW;
+};
+
+struct ScreenTriangle {
+    ScreenVertex v0;
+    ScreenVertex v1;
+    ScreenVertex v2;
+};
+
+inline Vec2 ndcToScreen(float x, float y, float width, float height) {
+    return Vec2{
+        (x + 1.0f) * 0.5f * width,
+        (1.0f - y) * 0.5f * height
+    };
+}
+
+inline float calculateSignedArea2D(const Vec2& a, const Vec2& b, const Vec2& c) {
+    return (b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x);
+}
+
+}
 
 void renderMesh3D(
     const Mesh& mesh,
     const Transform& transform,
     const Camera& camera)
 {
-    Mat4 modelMatrix = transform.getMatrix();
-    Mat4 viewMatrix = camera.getViewMatrix();
-    Mat4 projectionMatrix = camera.getProjectionMatrix();
+    if (mesh.triangles.empty() || mesh.vertices.empty()) return;
 
-    for (const Triangle3D& triangle : mesh.triangles)
+    const Mat4 modelMatrix      = transform.getMatrix();
+    const Mat4 viewMatrix       = camera.getViewMatrix();
+    const Mat4 projectionMatrix = camera.getProjectionMatrix();
+    const Mat4 mvpMatrix        = projectionMatrix * viewMatrix * modelMatrix;
+
+    const float screenWidth  = static_cast<float>(WIDTH);
+    const float screenHeight = static_cast<float>(HEIGHT);
+
+    const size_t vertexCount = mesh.vertices.size();
+
+    for (const Triangle3D& tri : mesh.triangles)
     {
-        if (triangle.a < 0 ||
-            triangle.a >= static_cast<int>(mesh.vertices.size()) ||
-            triangle.b < 0 ||
-            triangle.b >= static_cast<int>(mesh.vertices.size()) ||
-            triangle.c < 0 ||
-            triangle.c >= static_cast<int>(mesh.vertices.size()))
+        if (tri.a < 0 || static_cast<size_t>(tri.a) >= vertexCount ||
+            tri.b < 0 || static_cast<size_t>(tri.b) >= vertexCount ||
+            tri.c < 0 || static_cast<size_t>(tri.c) >= vertexCount)
         {
             continue;
         }
 
-        Vertex3D a = mesh.vertices[triangle.a];
-        Vertex3D b = mesh.vertices[triangle.b];
-        Vertex3D c = mesh.vertices[triangle.c];
+        const Vertex3D& vA = mesh.vertices[tri.a];
+        const Vertex3D& vB = mesh.vertices[tri.b];
+        const Vertex3D& vC = mesh.vertices[tri.c];
 
-        // Model space -> World space
-        Vec4 aWorld =
-            modelMatrix * Vec4(Vec3{a.x, a.y, a.z}, 1.0f);
+        Vec4 aClip = mvpMatrix * Vec4(vA.x, vA.y, vA.z, 1.0f);
+        Vec4 bClip = mvpMatrix * Vec4(vB.x, vB.y, vB.z, 1.0f);
+        Vec4 cClip = mvpMatrix * Vec4(vC.x, vC.y, vC.z, 1.0f);
 
-        Vec4 bWorld =
-            modelMatrix * Vec4(Vec3{b.x, b.y, b.z}, 1.0f);
-
-        Vec4 cWorld =
-            modelMatrix * Vec4(Vec3{c.x, c.y, c.z}, 1.0f);
-
-        // World space -> View space
-        Vec4 aView = viewMatrix * aWorld;
-        Vec4 bView = viewMatrix * bWorld;
-        Vec4 cView = viewMatrix * cWorld;
-
-        // Near clipping básico
-        if (aView.z >= -camera.nearPlane ||
-            bView.z >= -camera.nearPlane ||
-            cView.z >= -camera.nearPlane)
+        if (aClip.w <= camera.nearPlane || 
+            bClip.w <= camera.nearPlane || 
+            cClip.w <= camera.nearPlane)
         {
             continue;
         }
 
-        // View space -> Clip space
-        Vec4 aClip = projectionMatrix * aView;
-        Vec4 bClip = projectionMatrix * bView;
-        Vec4 cClip = projectionMatrix * cView;
+        const float invWA = 1.0f / aClip.w;
+        const float invWB = 1.0f / bClip.w;
+        const float invWC = 1.0f / cClip.w;
 
-        // Perspective divide
-        float ax = aClip.x / aClip.w;
-        float ay = aClip.y / aClip.w;
+        const Vec3 aNDC{ aClip.x * invWA, aClip.y * invWA, aClip.z * invWA };
+        const Vec3 bNDC{ bClip.x * invWB, bClip.y * invWB, bClip.z * invWB };
+        const Vec3 cNDC{ cClip.x * invWC, cClip.y * invWC, cClip.z * invWC };
 
-        float bx = bClip.x / bClip.w;
-        float by = bClip.y / bClip.w;
+        const Vec2 pA = ndcToScreen(aNDC.x, aNDC.y, screenWidth, screenHeight);
+        const Vec2 pB = ndcToScreen(bNDC.x, bNDC.y, screenWidth, screenHeight);
+        const Vec2 pC = ndcToScreen(cNDC.x, cNDC.y, screenWidth, screenHeight);
 
-        float cx = cClip.x / cClip.w;
-        float cy = cClip.y / cClip.w;
+        const float crossProduct = calculateSignedArea2D(pA, pB, pC);
 
-        // NDC [-1, 1] -> Screen
-        float p1ScreenX =
-            (ax + 1.0f) * 0.5f * WIDTH;
-
-        float p1ScreenY =
-            (1.0f - ay) * 0.5f * HEIGHT;
-
-        float p2ScreenX =
-            (bx + 1.0f) * 0.5f * WIDTH;
-
-        float p2ScreenY =
-            (1.0f - by) * 0.5f * HEIGHT;
-
-        float p3ScreenX =
-            (cx + 1.0f) * 0.5f * WIDTH;
-
-        float p3ScreenY =
-            (1.0f - cy) * 0.5f * HEIGHT;
-
-        // Backface culling
-        float cross =
-            (p2ScreenX - p1ScreenX) *
-            (p3ScreenY - p1ScreenY)
-            -
-            (p2ScreenY - p1ScreenY) *
-            (p3ScreenX - p1ScreenX);
-
-        if (cross <= 0.0f)
-        {
-            continue;
-        }
-
-        // Depth
-        float depthA = -aView.z;
-        float depthB = -bView.z;
-        float depthC = -cView.z;
-
-        Triangle t{
-            {
-                static_cast<int>(p1ScreenX),
-                static_cast<int>(p1ScreenY),
-                depthA
-            },
-
-            {
-                static_cast<int>(p2ScreenX),
-                static_cast<int>(p2ScreenY),
-                depthB
-            },
-
-            {
-                static_cast<int>(p3ScreenX),
-                static_cast<int>(p3ScreenY),
-                depthC
-            }
+        Triangle renderTri{
+            { static_cast<int>(pA.x), static_cast<int>(pA.y), aNDC.z },
+            { static_cast<int>(pB.x), static_cast<int>(pB.y), bNDC.z },
+            { static_cast<int>(pC.x), static_cast<int>(pC.y), cNDC.z }
         };
 
-        drawTriangle(t, 0xff0000ff);
+        const uint32_t surfaceColor = (crossProduct > 0.0f) ? 0x0000FFFF : 0xFF0000FF;
+        drawTriangle(renderTri, surfaceColor);
+    }
+}
+
+
+void renderMesh3DTextured(
+    const Mesh& mesh,
+    const Transform& transform,
+    const Camera& camera,
+    const Texture& texture)
+{
+    if (mesh.triangles.empty() || mesh.vertices.empty()) {
+        return;
+    }
+
+    const Mat4 modelMatrix      = transform.getMatrix();
+    const Mat4 viewMatrix       = camera.getViewMatrix();
+    const Mat4 projectionMatrix = camera.getProjectionMatrix();
+    const Mat4 mvpMatrix        = projectionMatrix * viewMatrix * modelMatrix;
+
+    const float screenWidth  = static_cast<float>(WIDTH);
+    const float screenHeight = static_cast<float>(HEIGHT);
+
+    std::vector<ScreenTriangle> visibleTriangles;
+    visibleTriangles.reserve(mesh.triangles.size());
+
+    const size_t vertexCount = mesh.vertices.size();
+
+    for (const Triangle3D& tri : mesh.triangles)
+    {
+        if (tri.a < 0 || static_cast<size_t>(tri.a) >= vertexCount ||
+            tri.b < 0 || static_cast<size_t>(tri.b) >= vertexCount ||
+            tri.c < 0 || static_cast<size_t>(tri.c) >= vertexCount)
+        {
+            continue;
+        }
+
+        const Vertex3D& vA = mesh.vertices[tri.a];
+        const Vertex3D& vB = mesh.vertices[tri.b];
+        const Vertex3D& vC = mesh.vertices[tri.c];
+
+        Vec4 aClip = mvpMatrix * Vec4(vA.x, vA.y, vA.z, 1.0f);
+        Vec4 bClip = mvpMatrix * Vec4(vB.x, vB.y, vB.z, 1.0f);
+        Vec4 cClip = mvpMatrix * Vec4(vC.x, vC.y, vC.z, 1.0f);
+
+        if (aClip.w <= camera.nearPlane || 
+            bClip.w <= camera.nearPlane || 
+            cClip.w <= camera.nearPlane)
+        {
+            continue;
+        }
+
+        const float invWA = 1.0f / aClip.w;
+        const float invWB = 1.0f / bClip.w;
+        const float invWC = 1.0f / cClip.w;
+
+        const Vec3 aNDC{ aClip.x * invWA, aClip.y * invWA, aClip.z * invWA };
+        const Vec3 bNDC{ bClip.x * invWB, bClip.y * invWB, bClip.z * invWB };
+        const Vec3 cNDC{ cClip.x * invWC, cClip.y * invWC, cClip.z * invWC };
+
+        const Vec2 pA = ndcToScreen(aNDC.x, aNDC.y, screenWidth, screenHeight);
+        const Vec2 pB = ndcToScreen(bNDC.x, bNDC.y, screenWidth, screenHeight);
+        const Vec2 pC = ndcToScreen(cNDC.x, cNDC.y, screenWidth, screenHeight);
+
+        const float crossProduct = calculateSignedArea2D(pA, pB, pC);
+        if (crossProduct <= 0.0f) {
+            continue;
+        }
+
+        Point3D renderA{
+            static_cast<int>(pA.x), static_cast<int>(pA.y), aNDC.z,
+            vA.u * invWA, vA.v * invWA, invWA
+        };
+
+        Point3D renderB{
+            static_cast<int>(pB.x), static_cast<int>(pB.y), bNDC.z,
+            vB.u * invWB, vB.v * invWB, invWB
+        };
+
+        Point3D renderC{
+            static_cast<int>(pC.x), static_cast<int>(pC.y), cNDC.z,
+            vC.u * invWC, vC.v * invWC, invWC
+        };
+
+        drawTexturedTriangle(renderA, renderB, renderC, texture);
+
+        visibleTriangles.push_back(ScreenTriangle{
+            { pA, aNDC.z, invWA },
+            { pB, bNDC.z, invWB },
+            { pC, cNDC.z, invWC }
+        });
+    }
+
+    constexpr uint32_t WIREFRAME_COLOR = 0x555555FF;
+
+    for (const ScreenTriangle& tri : visibleTriangles)
+    {
+        Point3D pA{ static_cast<int>(tri.v0.position.x), static_cast<int>(tri.v0.position.y), tri.v0.depthNDC, 0.0f, 0.0f, tri.v0.invW };
+        Point3D pB{ static_cast<int>(tri.v1.position.x), static_cast<int>(tri.v1.position.y), tri.v1.depthNDC, 0.0f, 0.0f, tri.v1.invW };
+        Point3D pC{ static_cast<int>(tri.v2.position.x), static_cast<int>(tri.v2.position.y), tri.v2.depthNDC, 0.0f, 0.0f, tri.v2.invW };
+
+        drawLineDepth(pA, pB, WIREFRAME_COLOR);
+        drawLineDepth(pB, pC, WIREFRAME_COLOR);
+        drawLineDepth(pC, pA, WIREFRAME_COLOR);
     }
 }
