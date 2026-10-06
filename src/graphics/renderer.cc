@@ -10,7 +10,7 @@ SDL_Texture* createTexture(SDL_Renderer* renderer)
 {
     SDL_Texture* texture = SDL_CreateTexture(
         renderer,
-        SDL_PIXELFORMAT_RGBA8888,
+        SDL_PIXELFORMAT_ARGB8888, // <-- CAMBIADO DE RGBA8888 A ARGB8888
         SDL_TEXTUREACCESS_STREAMING,
         WIDTH,
         HEIGHT

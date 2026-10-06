@@ -4,6 +4,7 @@
 #include "external/stb_image.h"
 
 #include <iostream>
+#include <cmath>
 
 namespace TextureLoader {
 
@@ -26,8 +27,15 @@ Texture load(const std::string& filepath)
         uint8_t r = data[i * 4 + 0];
         uint8_t g = data[i * 4 + 1];
         uint8_t b = data[i * 4 + 2];
-        uint8_t a = data[i * 4 + 3];
+        
+        // forzar Alpha a opaco (0xFF) si la imagen original es de 3 canales (RGB)
+        // esto lo que hace es evitar que los colores se vuelvan oscuros o semitransparentes
+        uint8_t a = (channels == 4) ? data[i * 4 + 3] : 0xFF;
 
+        // si la textura se ve oscura, asegura el alpha a 255
+        // uint8_t a = 0xFF;
+
+        // empaquetar en formato ARGB (0xAARRGGBB) para SDL_PIXELFORMAT_ARGB8888
         texture.pixels[i] = (static_cast<uint32_t>(a) << 24) |
                             (static_cast<uint32_t>(r) << 16) |
                             (static_cast<uint32_t>(g) << 8)  |
@@ -37,7 +45,8 @@ Texture load(const std::string& filepath)
     stbi_image_free(data);
 
     std::cout << "[INFO] Textura cargada: " << filepath 
-              << " (" << texture.width << "x" << texture.height << ")\n";
+              << " (" << texture.width << "x" << texture.height 
+              << ") | Canales originales: " << channels << "\n";
 
     return texture;
 }
