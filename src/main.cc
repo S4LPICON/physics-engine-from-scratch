@@ -1,117 +1,121 @@
 #include <SDL3/SDL.h>
 #include <iostream>
+#include <string>
 
-#include "framebuffer.h"
-#include "window.h"
-#include "renderer.h"
-#include "events.h"
-#include "obj_loader.h"
-#include "renderer3d.h"
+#include "graphics/framebuffer.h"
+#include "graphics/window.h"
+#include "graphics/renderer.h"
+#include "events/events.h"
+#include "tools/obj_loader.h"
+#include "graphics/renderer3d.h"
 
-#include "rasterizer.h"
+#include "graphics/rasterizer.h"
 #include "time/time.h"
-#include "input.h"
+#include "input/input.h"
 #include "camera/camera.h"
+#include "tools/texture_loader.h"
 
+namespace {
 
-Triangle near{
-    {500, 300, 100.0f},
-    {700, 500, 100.0f},
-    {300, 500, 100.0f}
-};
-
-Triangle far{
-    {500, 300, 200.0f},
-    {700, 500, 200.0f},
-    {300, 500, 200.0f}
-};
-
-void debug(const Mesh& cube)
+/**
+ * @brief Carga un modelo 3D con manejo de errores y reporte en consola.
+ */
+Mesh loadModelSafe(const std::string& path) 
 {
-        std::cout << "Vertices: " << cube.vertices.size() << '\n';
-        std::cout << "Triangles: " << cube.triangles.size() << '\n';
+    std::cout << "[INFO] Cargando modelo 3D desde: " << path << "...\n";
+    Mesh mesh = OBJLoader::load(path);
 
-        float minZ = cube.vertices[0].z;
-        float maxZ = cube.vertices[0].z;
+    if (mesh.vertices.empty() || mesh.triangles.empty()) {
+        std::cerr << "[ERROR] Fallo al cargar el modelo o archivo vacio: " << path << '\n';
+    } else {
+        std::cout << "[INFO] Modelo cargado exitosamente. Vértices: " 
+                  << mesh.vertices.size() << " | Triangulos: " 
+                  << mesh.triangles.size() << '\n';
+    }
 
-        for (const Vertex3D& v : cube.vertices) {
-            minZ = std::min(minZ, v.z);
-            maxZ = std::max(maxZ, v.z);
-        }
-
-        std::cout << "Z min: " << minZ << '\n';
-        std::cout << "Z max: " << maxZ << '\n';
-
+    return mesh;
 }
-
-Mesh loadModel(const std::string& path) 
-{
-    std::cout << "Intentando cargar modelo " << path << '\n';
-
-    return OBJLoader::load(path);
 }
 
 
-int main()
+int main(int argc, char* argv[])
 {
-    SDL_Init(SDL_INIT_VIDEO);
+    (void)argc;
+    (void)argv;
 
-    SDL_Window* window = createWindow();
+    if (!SDL_Init(SDL_INIT_VIDEO)) {
+        std::cerr << "[FATAL] Fallo al inicializar SDL3: " << SDL_GetError() << '\n';
+        return -1;
+    }
+
+    SDL_Window* window     = createWindow();
     SDL_Renderer* renderer = createRenderer(window);
-    SDL_Texture* texture = createTexture(renderer);
+    SDL_Texture* texture   = createTexture(renderer);
 
-    Mesh model = loadModel("assets/pollo.obj");
+    if (!window || !renderer || !texture) {
+        std::cerr << "[FATAL] Error al crear contexto grafico de SDL3.\n";
+        SDL_Quit();
+        return -1;
+    }
+
+    Mesh model = loadModelSafe("assets/cone.obj");
     Input input;
+    Texture modelTexture = TextureLoader::load("assets/cone.png");
+    
+    // transformacion por defecto para el objeto
     Transform transform;
-
-    transform.position = {0.0f, 0.0f, 0.0f};
+    transform.position = {0.0f, 0.0f, -30.0f};
     transform.rotation = {0.0f, 0.5f, 0.0f};
-    transform.scale = {2.0f, 2.0f, 2.0f};
+    transform.scale    = {2.0f, 2.0f, 2.0f};
 
+    // camera
     Camera camera;
+    camera.fov         = 70.0f;
+    camera.aspectRatio = static_cast<float>(WIDTH) / static_cast<float>(HEIGHT);
+    camera.nearPlane   = 0.1f;
+    camera.farPlane    = 1000.0f;
 
 
-    camera.fov = 70.0f;
-    camera.aspectRatio = 1280.0f / 720.0f;
-    camera.nearPlane = 0.1f;
-    camera.farPlane = 1000.0f;
-
-    float movementDt = 1;
+    constexpr float MOVE_SPEED = 15.0f; // unidades por segundo
+    constexpr float FOV_SPEED  = 30.0f; // grados por segundp
 
     while (processEvents())
     {
         Time::update();
+        const float dt = Time::deltaTime();
 
-        if (input.isKeyDown(Key::A))
-        {
-            transform.position.x -= movementDt;
+        // inputs
+        if (input.isKeyDown(Key::Space)) {
+            camera.fov += FOV_SPEED * dt;
+        }
+        if (input.isKeyDown(Key::Q)) {
+            camera.fov -= FOV_SPEED * dt;
         }
 
-        if (input.isKeyDown(Key::D))
-        {
-            transform.position.x += movementDt;
+        if (input.isKeyDown(Key::A)) {
+            transform.position.x -= MOVE_SPEED * dt;
+        }
+        if (input.isKeyDown(Key::D)) {
+            transform.position.x += MOVE_SPEED * dt;
         }
 
-        if (input.isKeyDown(Key::W))
-        {
-            transform.position.z -= movementDt;
+        if (input.isKeyDown(Key::W)) {
+            transform.position.z -= MOVE_SPEED * dt;
         }
-
-        if (input.isKeyDown(Key::S))
-        {
-            transform.position.z += movementDt;
+        if (input.isKeyDown(Key::S)) {
+            transform.position.z += MOVE_SPEED * dt;
         }
 
         clearFramebuffer(0xFFFFFFFF);
-
-        //drawTriangle(near, 0xFFFFFFFF);
-        //drawTriangle(far, 0x00FF22FF);
-
-        //debug(model);
         
-        transform.rotation.y += 2.0f * Time::deltaTime();
-        renderMesh3D(model, transform, camera);
+        // limpiar zbuffer
+        std::fill(zbuffer, zbuffer + (WIDTH * HEIGHT), 1000.0f);
 
+        //rontando el modelo
+        transform.rotation.y += 2.0f * dt;
+
+        // render mesh (con teztura)
+        renderMesh3DTextured(model, transform, camera, modelTexture);
 
         updateTexture(texture, framebuffer);
         drawFramebuffer(renderer, texture);
