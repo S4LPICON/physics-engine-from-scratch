@@ -14,29 +14,11 @@
 #include "input/input.h"
 #include "camera/camera.h"
 #include "tools/texture_loader.h"
+#include "tools/obj_loader.h"
 
-namespace {
-
-/**
- * @brief Carga un modelo 3D con manejo de errores y reporte en consola.
- */
-Mesh loadModelSafe(const std::string& path) 
-{
-    std::cout << "[INFO] Cargando modelo 3D desde: " << path << "...\n";
-    Mesh mesh = OBJLoader::load(path);
-
-    if (mesh.vertices.empty() || mesh.triangles.empty()) {
-        std::cerr << "[ERROR] Fallo al cargar el modelo o archivo vacio: " << path << '\n';
-    } else {
-        std::cout << "[INFO] Modelo cargado exitosamente. Vértices: " 
-                  << mesh.vertices.size() << " | Triangulos: " 
-                  << mesh.triangles.size() << '\n';
-    }
-
-    return mesh;
-}
-}
-
+constexpr float MOVE_SPEED = 15.0f; // unidades por segundo
+constexpr float FOV_SPEED  = 30.0f; // grados por segundp
+constexpr float ROTATION_SPEED = 7.0f; // unidades por segundo
 
 int main(int argc, char* argv[])
 {
@@ -58,9 +40,9 @@ int main(int argc, char* argv[])
         return -1;
     }
 
-    Mesh model = loadModelSafe("assets/cone.obj");
+    Mesh model = loadModelSafe("assets/test.obj");
     Input input;
-    Texture modelTexture = TextureLoader::load("assets/cone.png");
+    Texture modelTexture = TextureLoader::load("assets/test.png");
     
     // transformacion por defecto para el objeto
     Transform transform;
@@ -75,10 +57,6 @@ int main(int argc, char* argv[])
     camera.nearPlane   = 0.1f;
     camera.farPlane    = 1000.0f;
 
-
-    constexpr float MOVE_SPEED = 15.0f; // unidades por segundo
-    constexpr float FOV_SPEED  = 30.0f; // grados por segundp
-
     while (processEvents())
     {
         Time::update();
@@ -86,24 +64,38 @@ int main(int argc, char* argv[])
 
         // inputs
         if (input.isKeyDown(Key::Space)) {
-            camera.fov += FOV_SPEED * dt;
+            camera.position.y += MOVE_SPEED * dt;
         }
-        if (input.isKeyDown(Key::Q)) {
-            camera.fov -= FOV_SPEED * dt;
+        if (input.isKeyDown(Key::Shift)) {
+            camera.position.y -= MOVE_SPEED * dt;
         }
 
         if (input.isKeyDown(Key::A)) {
-            transform.position.x -= MOVE_SPEED * dt;
+            camera.position.x -= MOVE_SPEED * dt;
         }
         if (input.isKeyDown(Key::D)) {
-            transform.position.x += MOVE_SPEED * dt;
+            camera.position.x += MOVE_SPEED * dt;
         }
 
         if (input.isKeyDown(Key::W)) {
-            transform.position.z -= MOVE_SPEED * dt;
+            camera.position.z -= MOVE_SPEED * dt;
         }
         if (input.isKeyDown(Key::S)) {
-            transform.position.z += MOVE_SPEED * dt;
+            camera.position.z += MOVE_SPEED * dt;
+        }
+
+        if (input.isKeyDown(Key::Left)) {
+            camera.rotation.y += ROTATION_SPEED * dt;
+        }
+        if (input.isKeyDown(Key::Right)) {
+            camera.rotation.y -= ROTATION_SPEED * dt;
+        }
+
+        if (input.isKeyDown(Key::Up)) {
+            camera.rotation.x += ROTATION_SPEED * dt;
+        }
+        if (input.isKeyDown(Key::Down)) {
+            camera.rotation.x -= ROTATION_SPEED * dt;
         }
 
         clearFramebuffer(0xFFFFFFFF);
@@ -116,6 +108,7 @@ int main(int argc, char* argv[])
 
         // render mesh (con teztura)
         renderMesh3DTextured(model, transform, camera, modelTexture);
+        //renderMesh3D(model, transform, camera);
 
         updateTexture(texture, framebuffer);
         drawFramebuffer(renderer, texture);
