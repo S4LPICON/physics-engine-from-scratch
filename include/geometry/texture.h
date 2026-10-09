@@ -1,5 +1,4 @@
-#ifndef GEOMETRY_H
-#define GEOMETRY_H
+#pragma once
 
 #include <vector>
 #include <algorithm>
@@ -26,5 +25,3 @@ struct Texture {
         return pixels[y * width + x];
     }
 };
-
-#endif

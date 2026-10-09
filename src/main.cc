@@ -15,54 +15,54 @@
 #include "camera/camera.h"
 #include "tools/texture_loader.h"
 #include "tools/obj_loader.h"
+#include "engine/game_object.h"
+
+#include "engine/components/renderer_component.h"
 
 constexpr float MOVE_SPEED = 15.0f; // unidades por segundo
 constexpr float FOV_SPEED  = 30.0f; // grados por segundp
 constexpr float ROTATION_SPEED = 7.0f; // unidades por segundo
 
-int main(int argc, char* argv[])
+
+
+bool Init_Engine(SDL_Window*& window, SDL_Renderer*& renderer, SDL_Texture*& texture) 
 {
-    (void)argc;
-    (void)argv;
-
     if (!SDL_Init(SDL_INIT_VIDEO)) {
-        std::cerr << "[FATAL] Fallo al inicializar SDL3: " << SDL_GetError() << '\n';
-        return -1;
+        std::cerr << "[FATAL] Fallo al inicializar SDL3: "
+                  << SDL_GetError() << '\n';
+        return false;
     }
 
-    SDL_Window* window     = createWindow();
-    SDL_Renderer* renderer = createRenderer(window);
-    SDL_Texture* texture   = createTexture(renderer);
-
-    if (!window || !renderer || !texture) {
-        std::cerr << "[FATAL] Error al crear contexto grafico de SDL3.\n";
+    window = createWindow();
+    if (!window) {
+        std::cerr << "[FATAL] Error al crear la ventana.\n";
         SDL_Quit();
-        return -1;
+        return false;
     }
 
-    Mesh model = loadModelSafe("assets/test.obj");
-    Input input;
-    Texture modelTexture = TextureLoader::load("assets/test.png");
-    
-    // transformacion por defecto para el objeto
-    Transform transform;
-    transform.position = {0.0f, 0.0f, -30.0f};
-    transform.rotation = {0.0f, 0.5f, 0.0f};
-    transform.scale    = {2.0f, 2.0f, 2.0f};
+    renderer = createRenderer(window);
+    if (!renderer) {
+        std::cerr << "[FATAL] Error al crear el renderer.\n";
+        destroyWindow(window);
+        SDL_Quit();
+        return false;
+    }
 
-    // camera
-    Camera camera;
-    camera.fov         = 70.0f;
-    camera.aspectRatio = static_cast<float>(WIDTH) / static_cast<float>(HEIGHT);
-    camera.nearPlane   = 0.1f;
-    camera.farPlane    = 1000.0f;
+    texture = createTexture(renderer);
+    if (!texture) {
+        std::cerr << "[FATAL] Error al crear la textura.\n";
+        destroyRenderer(renderer, nullptr);
+        destroyWindow(window);
+        SDL_Quit();
+        return false;
+    }
 
-    while (processEvents())
-    {
-        Time::update();
-        const float dt = Time::deltaTime();
+    return true;
+}
 
-        // inputs
+void handleInput(const Input& input, Camera& camera, int moveSpeed, float dt )
+{
+    // inputs
         if (input.isKeyDown(Key::Space)) {
             camera.position.y += MOVE_SPEED * dt;
         }
@@ -97,18 +97,43 @@ int main(int argc, char* argv[])
         if (input.isKeyDown(Key::Down)) {
             camera.rotation.x -= ROTATION_SPEED * dt;
         }
+}
 
-        clearFramebuffer(0xFFFFFFFF);
+int main()
+{
+
+    SDL_Window* window = nullptr;
+    SDL_Renderer* renderer = nullptr;
+    SDL_Texture* texture = nullptr;
+
+    if (!Init_Engine(window, renderer, texture)) {
+        return -1;
+    }
+    
+    // camera
+    Input input;
+    Camera camera;
+    GameObject object;
+    Mesh model = loadModelSafe("assets/cat.obj");
+    Mesh model2 = loadModelSafe("assets/mtest.obj");
+    Texture modelTexture = TextureLoader::load("assets/waoos.png");
+
+    object.addComponent(
+        std::make_unique<RendererComponent>(&model, &modelTexture, &camera)
+    );
+
+    while (processEvents())
+    {
+        Time::update();
+        const float dt = Time::deltaTime();
+
+        handleInput(input, camera, MOVE_SPEED, dt);
         
-        // limpiar zbuffer
-        std::fill(zbuffer, zbuffer + (WIDTH * HEIGHT), 1000.0f);
+        //clean buffers
+        clearFramebuffer(0xFFFFFFFF);
+        clearZBuffer();
 
-        //rontando el modelo
-        transform.rotation.y += 2.0f * dt;
-
-        // render mesh (con teztura)
-        renderMesh3DTextured(model, transform, camera, modelTexture);
-        //renderMesh3D(model, transform, camera);
+        object.update(dt);
 
         updateTexture(texture, framebuffer);
         drawFramebuffer(renderer, texture);

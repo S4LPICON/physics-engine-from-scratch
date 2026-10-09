@@ -16,6 +16,8 @@ SOURCES = \
     src/time/time.cc \
     src/camera/camera.cc \
     src/graphics/texture_loader.cc \
+    src/engine/game_object.cc \
+    src/engine/components/renderer_component.cc \
     src/tools/obj_loader.cc
 
 build/physics: $(SOURCES)

@@ -3,8 +3,8 @@
 #ifndef TEXTURE_LOADER_H
 #define TEXTURE_LOADER_H
 
-#include "geometry/geometry.h"
 #include <string>
+#include "geometry/texture.h"
 
 namespace TextureLoader {
     /**
