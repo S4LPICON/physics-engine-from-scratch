@@ -14,14 +14,15 @@ struct Texture {
     uint32_t sample(float u, float v) const {
         if (pixels.empty()) return 0xFFFFFFFF;
 
-        u = u - std::floor(u);
-        v = v - std::floor(v);
+        u = std::clamp(u, 0.0f, 1.0f);
+        v = std::clamp(v, 0.0f, 1.0f);
 
-        int x = static_cast<int>(u * static_cast<float>(width - 1));
-        int y = static_cast<int>((1.0f - v) * static_cast<float>(height - 1));
+        // se mapea al centro exacto del texel
+        float texXf = u * static_cast<float>(width) - 0.5f;
+        float texYf = (1.0f - v) * static_cast<float>(height) - 0.5f;
 
-        x = std::clamp(x, 0, width - 1);
-        y = std::clamp(y, 0, height - 1);
+        int x = std::clamp(static_cast<int>(std::floor(texXf + 0.5f)), 0, width - 1);
+        int y = std::clamp(static_cast<int>(std::floor(texYf + 0.5f)), 0, height - 1);
 
         return pixels[y * width + x];
     }

@@ -19,6 +19,7 @@ struct Triangle {
 };
 
 void drawTriangle(const Triangle& t, uint32_t color);
+inline uint32_t sampleTexture(const Texture& texture, float u, float v);
 void drawTexturedTriangle(
     const Point3D& a, 
     const Point3D& b, 
