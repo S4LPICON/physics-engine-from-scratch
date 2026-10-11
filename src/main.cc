@@ -10,7 +10,7 @@
 #include "graphics/renderer3d.h"
 
 #include "graphics/rasterizer.h"
-#include "time/time.h"
+#include "time/s4time.h"
 #include "input/input.h"
 #include "camera/camera.h"
 #include "tools/texture_loader.h"
