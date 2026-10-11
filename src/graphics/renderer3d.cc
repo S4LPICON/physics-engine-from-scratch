@@ -164,7 +164,7 @@ void renderMesh3DTextured(
         const Vec2 pC = ndcToScreen(cNDC.x, cNDC.y, screenWidth, screenHeight);
 
         const float crossProduct = calculateSignedArea2D(pA, pB, pC);
-        if (crossProduct <= 0.0f) {
+        if (crossProduct >= 0.0f) {
             continue;
         }
 
