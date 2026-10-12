@@ -1,9 +1,30 @@
-#include <vector>
-#include "mesh.h"
 
-/*
-TODO: construir scene para manejar los objetos de una escena
-tambien hacer un manejador de escenas para instanciar escenas y des-instanciar
-*/
+#include "engine/scene.h"
 
-std::vector<Mesh> meshes; 
+Scene::Scene()
+{
+}
+
+Scene::~Scene()
+{
+}
+
+void Scene::setCamera(Camera* camera)
+{
+    Scene::camera = camera;
+}
+
+void Scene::addGameObject(std::unique_ptr<GameObject> gameObject)
+{
+    objects.push_back(std::move(gameObject));
+}
+
+const std::vector<std::unique_ptr<GameObject>>& Scene::getObjects() const
+{
+    return objects;
+}
+
+Camera* Scene::getCamera() const
+{
+    return camera;
+}
