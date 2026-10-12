@@ -1,5 +1,6 @@
 
 #include <limits>
+#include <iostream>
 
 #include "graphics/framebuffer.h"
 
@@ -13,6 +14,11 @@ void clearFramebuffer(uint32_t color)
         framebuffer[i] = color;
         zbuffer[i] = std::numeric_limits<float>::infinity();
     }
+}
+
+void clearZBuffer()
+{
+    std::fill(zbuffer, zbuffer + (WIDTH * HEIGHT), 1000.0f);
 }
 
 void drawPixel(int x, int y, uint32_t color)
