@@ -4,7 +4,7 @@
 #define RASTERIZER_H
 
 #include <cstdint>
-#include "geometry/geometry.h"
+#include "geometry/texture.h"
 
 struct Point3D {
     int x{0}, y{0};
