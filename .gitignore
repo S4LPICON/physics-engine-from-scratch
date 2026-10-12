@@ -2,3 +2,4 @@ build/
 notes.md
 assets/
 .vscode/
+src/main.cc
