@@ -2,4 +2,4 @@
 
 class Scene;
 
-void startRenderScenePipeline(const Scene& scene);
+void startRenderScenePipeline(const Scene& scene, float deltaTime);
