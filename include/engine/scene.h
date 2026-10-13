@@ -16,6 +16,7 @@ public:
     ~Scene();
     void setCamera(Camera* camera);
     Camera* getCamera() const;
+    Camera* getModifiableCamera(); // temp
     void addGameObject(std::unique_ptr<GameObject> gameObject);
     const std::vector<std::unique_ptr<GameObject>>& getObjects() const;
 };

@@ -28,3 +28,8 @@ Camera* Scene::getCamera() const
 {
     return camera;
 }
+
+Camera* Scene::getModifiableCamera()
+{
+    return camera;
+}
