@@ -29,3 +29,4 @@ public:
     
 };
 
+void tempCameraController(Camera& camera, const Input& input, float deltaTime);

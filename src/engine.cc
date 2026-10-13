@@ -7,6 +7,8 @@
 #include "events/events.h"
 #include "graphics/framebuffer.h"
 #include "time/s4time.h"
+#include "engine/pipelines/renderer_pipeline.h"
+#include "engine/pipelines/object_update_pipeline.h"
 
 Engine::Engine(){}
 Engine::~Engine(){}
@@ -49,14 +51,55 @@ void Engine::run(){
         deltaTime = Time::deltaTime();
         clearFramebuffer(0xFFFFFFFF);
         clearZBuffer();
-       
         //physics pipeline (future)
         //renderer pipeline
-        
+        startUpdateObjectsPipeline(*scene, deltaTime);
+        startRenderScenePipeline(*scene, deltaTime);
+        auto camera = scene->getModifiableCamera();
+        tempCameraController(*camera, input, deltaTime);
 
         updateTexture(texture, framebuffer);
         drawFramebuffer(renderer, texture);
     }
+}
+
+void tempCameraController(Camera& camera, const Input& input, float deltaTime)
+{
+    // inputs
+        if (input.isKeyDown(Key::Space)) {
+            camera.position.y += MOVE_SPEED * deltaTime;
+        }
+        if (input.isKeyDown(Key::Shift)) {
+            camera.position.y -= MOVE_SPEED * deltaTime;
+        }
+
+        if (input.isKeyDown(Key::A)) {
+            camera.position.x -= MOVE_SPEED * deltaTime;
+        }
+        if (input.isKeyDown(Key::D)) {
+            camera.position.x += MOVE_SPEED * deltaTime;
+        }
+
+        if (input.isKeyDown(Key::W)) {
+            camera.position.z -= MOVE_SPEED * deltaTime;
+        }
+        if (input.isKeyDown(Key::S)) {
+            camera.position.z += MOVE_SPEED * deltaTime;
+        }
+
+        if (input.isKeyDown(Key::Left)) {
+            camera.rotation.y += ROTATION_SPEED * deltaTime;
+        }
+        if (input.isKeyDown(Key::Right)) {
+            camera.rotation.y -= ROTATION_SPEED * deltaTime;
+        }
+
+        if (input.isKeyDown(Key::Up)) {
+            camera.rotation.x += ROTATION_SPEED * deltaTime;
+        }
+        if (input.isKeyDown(Key::Down)) {
+            camera.rotation.x -= ROTATION_SPEED * deltaTime;
+        }
 }
 
 void Engine::stop()
