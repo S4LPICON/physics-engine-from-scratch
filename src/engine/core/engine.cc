@@ -8,6 +8,8 @@
 #include "engine/pipelines/renderer_pipeline.h"
 #include "engine/pipelines/object_update_pipeline.h"
 
+#include "engine/physics/CollisionSystem.h"
+
 Engine::Engine(){}
 Engine::~Engine(){}
 
@@ -51,6 +53,7 @@ void Engine::run(){
         clearZBuffer();
         //physics pipeline (future)
         //renderer pipeline
+        detectCollisions(scene);
         startUpdateObjectsPipeline(*scene, deltaTime);
         startRenderScenePipeline(*scene, deltaTime);
         auto camera = scene->getModifiableCamera();
@@ -61,43 +64,66 @@ void Engine::run(){
     }
 }
 
+#include <cmath>
+
 void tempCameraController(Camera& camera, const Input& input, float deltaTime)
 {
-    // inputs
-        if (input.isKeyDown(Key::Space)) {
-            camera.position.y += MOVE_SPEED * deltaTime;
-        }
-        if (input.isKeyDown(Key::Shift)) {
-            camera.position.y -= MOVE_SPEED * deltaTime;
-        }
+    // Dirección horizontal de la cámara
+    float yaw = camera.rotation.y;
 
-        if (input.isKeyDown(Key::A)) {
-            camera.position.x -= MOVE_SPEED * deltaTime;
-        }
-        if (input.isKeyDown(Key::D)) {
-            camera.position.x += MOVE_SPEED * deltaTime;
-        }
+    Vec3 forward{
+        -std::sin(yaw),
+        0.0f,
+        -std::cos(yaw)
+    };
 
-        if (input.isKeyDown(Key::W)) {
-            camera.position.z -= MOVE_SPEED * deltaTime;
-        }
-        if (input.isKeyDown(Key::S)) {
-            camera.position.z += MOVE_SPEED * deltaTime;
-        }
+    Vec3 right{
+        std::cos(yaw),
+        0.0f,
+        -std::sin(yaw)
+    };
 
-        if (input.isKeyDown(Key::Left)) {
-            camera.rotation.y += ROTATION_SPEED * deltaTime;
-        }
-        if (input.isKeyDown(Key::Right)) {
-            camera.rotation.y -= ROTATION_SPEED * deltaTime;
-        }
+    // Movimiento vertical
+    if (input.isKeyDown(Key::Space)) {
+        camera.position.y += MOVE_SPEED * deltaTime;
+    }
+    if (input.isKeyDown(Key::Shift)) {
+        camera.position.y -= MOVE_SPEED * deltaTime;
+    }
 
-        if (input.isKeyDown(Key::Up)) {
-            camera.rotation.x += ROTATION_SPEED * deltaTime;
-        }
-        if (input.isKeyDown(Key::Down)) {
-            camera.rotation.x -= ROTATION_SPEED * deltaTime;
-        }
+    // Movimiento relativo a la cámara
+    if (input.isKeyDown(Key::W)) {
+        camera.position.x += forward.x * MOVE_SPEED * deltaTime;
+        camera.position.z += forward.z * MOVE_SPEED * deltaTime;
+    }
+    if (input.isKeyDown(Key::S)) {
+        camera.position.x -= forward.x * MOVE_SPEED * deltaTime;
+        camera.position.z -= forward.z * MOVE_SPEED * deltaTime;
+    }
+    if (input.isKeyDown(Key::D)) {
+        camera.position.x += right.x * MOVE_SPEED * deltaTime;
+        camera.position.z += right.z * MOVE_SPEED * deltaTime;
+    }
+    if (input.isKeyDown(Key::A)) {
+        camera.position.x -= right.x * MOVE_SPEED * deltaTime;
+        camera.position.z -= right.z * MOVE_SPEED * deltaTime;
+    }
+
+    // Rotación horizontal
+    if (input.isKeyDown(Key::Left)) {
+        camera.rotation.y += ROTATION_SPEED * deltaTime;
+    }
+    if (input.isKeyDown(Key::Right)) {
+        camera.rotation.y -= ROTATION_SPEED * deltaTime;
+    }
+
+    // Rotación vertical
+    if (input.isKeyDown(Key::Up)) {
+        camera.rotation.x += ROTATION_SPEED * deltaTime;
+    }
+    if (input.isKeyDown(Key::Down)) {
+        camera.rotation.x -= ROTATION_SPEED * deltaTime;
+    }
 }
 
 void Engine::stop()
