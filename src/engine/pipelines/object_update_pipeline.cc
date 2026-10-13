@@ -1,6 +1,6 @@
 #include "engine/pipelines/object_update_pipeline.h"
-#include "engine/scene.h"
-#include "components/script_component.h"
+#include "engine/objects/generic/scene.h"
+#include "engine/components/script_component.h"
 #include <iostream>
 
 void startUpdateObjectsPipeline(const Scene& scene, float deltaTime)

@@ -1,8 +1,4 @@
-#include "engine.h"
-#include "tools/obj_loader.h"
-#include "tools/texture_loader.h"
-#include "geometry/texture.h"
-#include "components/renderer_component.h"
+#include "engine/core/engine.h"
 
 #include "scripts/rotation_script.h"
 

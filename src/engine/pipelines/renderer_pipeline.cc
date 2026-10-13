@@ -1,9 +1,9 @@
 #include "engine/pipelines/renderer_pipeline.h"
 
 #include <iostream>
-#include "engine/scene.h"
-#include "graphics/renderer3d.h"
-#include "components/renderer_component.h"
+#include "engine/objects/generic/scene.h"
+#include "rendering/backends/software/graphics/renderer3d.h"
+#include "engine/components/renderer_component.h"
 
 void startRenderScenePipeline(const Scene& scene, float deltaTime)
 {
