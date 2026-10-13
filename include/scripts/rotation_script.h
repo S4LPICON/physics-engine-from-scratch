@@ -1,6 +1,6 @@
 #pragma once
 
-#include "components/script_component.h"
+#include "engine/components/script_component.h"
 
 class RotationScript : public ScriptComponent
 {
