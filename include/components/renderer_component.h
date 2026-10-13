@@ -12,7 +12,7 @@ private:
     Texture* texture = nullptr;
 
 public:
-    RendererComponent();
+    RendererComponent(Mesh* mesh, Texture* texture);
     ~RendererComponent() override;
 
     void setMesh(Mesh* mesh);

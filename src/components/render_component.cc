@@ -4,7 +4,8 @@
 #include "geometry/texture.h"
 
 
-RendererComponent::RendererComponent(/* args */)
+RendererComponent::RendererComponent(Mesh* mesh, Texture* texture)
+    :mesh(mesh), texture(texture)
 {
 }
 
