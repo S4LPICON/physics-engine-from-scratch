@@ -1,10 +1,47 @@
 # Physics Engine From Scratch
 
-A lightweight 3D game engine built from scratch in C++.
+<p align="center">
+  <strong>A lightweight 3D game engine built from scratch in C++.</strong>
+  <br />
+  Building a usable foundation for 3D games through custom rendering, engine architecture, and physics.
+  <br /><br />
+  <a href="https://github.com/S4LPICON/physics-engine-from-scratch">
+    <img src="https://img.shields.io/badge/language-C%2B%2B17-00599C?logo=cplusplus&logoColor=white" alt="C++17" />
+  </a>
+  <a href="https://www.libsdl.org/">
+    <img src="https://img.shields.io/badge/SDL-3-1e90ff?logo=sdl&logoColor=white" alt="SDL3" />
+  </a>
+  <img src="https://img.shields.io/badge/renderer-Software-orange" alt="Software renderer" />
+  <img src="https://img.shields.io/badge/status-In%20Development-yellow" alt="In development" />
+  <br />
+  <a href="https://github.com/S4LPICON/physics-engine-from-scratch/blob/main/ROADMAP.md">
+    <img src="https://img.shields.io/badge/ROADMAP-View-8A2BE2" alt="View roadmap" />
+  </a>
+  <a href="https://github.com/S4LPICON/physics-engine-from-scratch/blob/main/LICENSE">
+    <img src="https://img.shields.io/badge/license-See%20repository-lightgrey" alt="License information" />
+  </a>
+</p>
 
-The goal is to build a **usable and extensible foundation for 3D game development**, with control over the engine's core systems — from rendering and scene management to physics and gameplay.
+---
 
-This project combines practical engine development with low-level implementation. Rather than stopping at isolated graphics experiments, the focus is on turning those systems into a coherent engine that can eventually be used to build complete games.
+## Overview
+
+Physics Engine From Scratch is an experimental 3D game engine written in C++17. Its goal is to evolve into a **usable and extensible foundation for building small 3D games**, with control over its core systems — from rendering and scene management to physics and gameplay.
+
+Instead of relying entirely on an existing engine, this project implements its core systems from the ground up wherever practical, while using libraries such as SDL3 for platform-level functionality.
+
+The focus is not only on understanding how engines work internally, but on turning that understanding into a coherent engine that can be used to build actual games.
+
+## Contents
+
+- [Features](#features)
+- [Architecture](#architecture)
+- [Roadmap](#roadmap)
+- [Design Philosophy](#design-philosophy)
+- [Building](#building)
+- [Project Status](#project-status)
+
+---
 
 ## Features
 
