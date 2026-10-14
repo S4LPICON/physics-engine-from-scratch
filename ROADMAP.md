@@ -22,7 +22,7 @@ The project is developed progressively, starting from low-level mathematics and 
 * [x] CPU framebuffer
 * [x] Pixel rendering
 * [x] Line rasterization
-* [ ] Circle rasterization
+* [x] Circle rasterization
 * [ ] Rectangle rasterization
 * [x] Triangle rasterization
 * [x] Triangle interpolation
@@ -61,9 +61,9 @@ The project is developed progressively, starting from low-level mathematics and 
 ### Collision Detection
 
 * [ ] AABB
-* [ ] Circle
+* [x] Circle
 * [ ] AABB vs AABB
-* [ ] Circle vs Circle
+* [x] Circle vs Circle
 * [ ] Circle vs AABB
 * [ ] Collision normals
 * [ ] Penetration depth
