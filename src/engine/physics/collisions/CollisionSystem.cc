@@ -2,8 +2,11 @@
 #include "engine/physics/CollisionSystem.h"
 
 #include "engine/components/physics/collider_component.h"
+#include "engine/components/physics/sphere_collider.h"
 #include "engine/objects/generic/game_object.h"
 #include "engine/objects/generic/scene.h"
+
+#include "rendering/backends/software/graphics/renderer3d.h"
 
 #include <iostream>
 #include <vector>
@@ -13,12 +16,12 @@ namespace
     struct ColliderEntry
     {
         GameObject* owner;
-        ColliderComponent* collider;
+        SphereCollider* collider;
     };
 
     bool checkCollision(
-        const ColliderComponent& a,
-        const ColliderComponent& b)
+        const SphereCollider& a,
+        const SphereCollider& b)
     {
         const Vec3 centerA = a.getWorldCenter();
         const Vec3 centerB = b.getWorldCenter();
@@ -54,10 +57,18 @@ void detectCollisions(Scene* scene)
         }
 
         auto components =
-            gameObject->getComponents<ColliderComponent>();
+            gameObject->getComponents<SphereCollider>();
 
         for (auto* collider : components)
         {
+
+            renderDebugSphere(
+                collider->getWorldCenter(),
+                1.0f,
+                *scene->getCamera(),
+                0xFF00FF00
+            );
+            
             colliders.push_back({
                 gameObject.get(),
                 collider

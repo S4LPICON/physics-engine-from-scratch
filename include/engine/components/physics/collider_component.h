@@ -7,13 +7,7 @@
 class ColliderComponent : public Component
 {
 private:
-    float radius;
-
 public:
-    explicit ColliderComponent(float radius = 0.5f);
-
-    float getRadius() const;
-    void setRadius(float radius);
-
+    ColliderComponent();
     Vec3 getWorldCenter() const;
 };

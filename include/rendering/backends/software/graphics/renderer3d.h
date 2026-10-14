@@ -7,3 +7,9 @@
 
 void renderMesh3DTextured(const Mesh& mesh, const Transform& transform, const Camera& camera, const Texture& texture);
 void renderMesh3D(const Mesh& mesh, const Transform& transform, const Camera& camera);
+void renderDebugSphere(
+    const Vec3& center,
+    float radius,
+    const Camera& camera,
+    uint32_t color
+);

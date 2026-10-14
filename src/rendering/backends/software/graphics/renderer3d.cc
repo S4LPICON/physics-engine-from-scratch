@@ -7,29 +7,145 @@
 
 namespace {
 
-struct ScreenVertex {
-    Vec2 position;
-    float depthNDC;
-    float invW;
-};
-
-struct ScreenTriangle {
-    ScreenVertex v0;
-    ScreenVertex v1;
-    ScreenVertex v2;
-};
-
-inline Vec2 ndcToScreen(float x, float y, float width, float height) {
-    return Vec2{
-        (x + 1.0f) * 0.5f * width,
-        (1.0f - y) * 0.5f * height
+    struct ScreenVertex {
+        Vec2 position;
+        float depthNDC;
+        float invW;
     };
+
+    struct ScreenTriangle {
+        ScreenVertex v0;
+        ScreenVertex v1;
+        ScreenVertex v2;
+    };
+
+    inline Vec2 ndcToScreen(float x, float y, float width, float height) {
+        return Vec2{
+            (x + 1.0f) * 0.5f * width,
+            (1.0f - y) * 0.5f * height
+        };
+    }
+
+    inline float calculateSignedArea2D(const Vec2& a, const Vec2& b, const Vec2& c) {
+        return (b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x);
+    }
+
+
+    bool projectWorldPoint(
+        const Vec3& point,
+        const Mat4& viewProjection,
+        const Camera& camera,
+        Point3D& result)
+    {
+        const Vec4 clip = viewProjection *
+            Vec4(point.x, point.y, point.z, 1.0f);
+
+        if (clip.w <= camera.nearPlane) {
+            return false;
+        }
+
+        const float invW = 1.0f / clip.w;
+
+        const float ndcX = clip.x * invW;
+        const float ndcY = clip.y * invW;
+        const float ndcZ = clip.z * invW;
+
+        const Vec2 screen = ndcToScreen(
+            ndcX,
+            ndcY,
+            static_cast<float>(WIDTH),
+            static_cast<float>(HEIGHT)
+        );
+
+        result = Point3D{
+            static_cast<int>(screen.x),
+            static_cast<int>(screen.y),
+            ndcZ
+        };
+
+        return true;
+    }
+
 }
 
-inline float calculateSignedArea2D(const Vec2& a, const Vec2& b, const Vec2& c) {
-    return (b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x);
-}
 
+void renderDebugSphere(
+    const Vec3& center,
+    float radius,
+    const Camera& camera,
+    uint32_t color)
+{
+    if (radius <= 0.0f) {
+        return;
+    }
+
+    constexpr int SEGMENTS = 48;
+
+    const Mat4 viewProjection =
+        camera.getProjectionMatrix() *
+        camera.getViewMatrix();
+
+    // Dibuja una circunferencia en cada uno de los
+    // tres planos: XY, XZ e YZ.
+    for (int plane = 0; plane < 3; ++plane)
+    {
+        for (int i = 0; i < SEGMENTS; ++i)
+        {
+            const float angleA =
+                2.0f * 3.14159265358979323846f *
+                static_cast<float>(i) / SEGMENTS;
+
+            const float angleB =
+                2.0f * 3.14159265358979323846f *
+                static_cast<float>(i + 1) / SEGMENTS;
+
+            Vec3 a = center;
+            Vec3 b = center;
+
+            const float cosA = std::cos(angleA);
+            const float sinA = std::sin(angleA);
+            const float cosB = std::cos(angleB);
+            const float sinB = std::sin(angleB);
+
+            if (plane == 0) // XY
+            {
+                a.x += radius * cosA;
+                a.y += radius * sinA;
+
+                b.x += radius * cosB;
+                b.y += radius * sinB;
+            }
+            else if (plane == 1) // XZ
+            {
+                a.x += radius * cosA;
+                a.z += radius * sinA;
+
+                b.x += radius * cosB;
+                b.z += radius * sinB;
+            }
+            else // YZ
+            {
+                a.y += radius * cosA;
+                a.z += radius * sinA;
+
+                b.y += radius * cosB;
+                b.z += radius * sinB;
+            }
+
+            Point3D screenA{};
+            Point3D screenB{};
+
+            if (!projectWorldPoint(
+                    a, viewProjection, camera, screenA) ||
+                !projectWorldPoint(
+                    b, viewProjection, camera, screenB))
+            {
+                continue;
+            }
+
+            drawLine(screenA, screenB, color);
+        }
+    }
 }
 
 void renderMesh3D(

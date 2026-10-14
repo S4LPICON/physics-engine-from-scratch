@@ -10,8 +10,8 @@ int main(int argc, char* argv[])
     Mesh model = OBJLoader::load("assets/models/sphere.obj");
     Texture texture = TextureLoader::load("assets/models/sphere.png");
 
-    //Mesh model2 = OBJLoader::load("assets/test2.obj");
-    //Texture texture2 = TextureLoader::load("assets/text2.png");
+    Mesh model2 = OBJLoader::load("assets/models/asd.obj");
+    Texture texture2 = TextureLoader::load("assets/models/asd.png");
 
     // camera
     Camera camera;
@@ -31,8 +31,7 @@ int main(int argc, char* argv[])
 
     auto rotScript = std::make_unique<RotationScript>();
 
-    auto collider = std::make_unique<SphereCollider>();
-    collider->setRadius(3.0f);
+    auto collider = std::make_unique<SphereCollider>(1.0f);
 
     gameObject->addComponent(std::move(renderComponent));
     gameObject->addComponent(std::move(rotScript));
@@ -40,7 +39,11 @@ int main(int argc, char* argv[])
 
 
     //-----------------------------
+    auto gameObjectplane = std::make_unique<GameObject>();
+    auto renderComponentplane =
+        std::make_unique<RendererComponent>(&model2, &texture2);
 
+    gameObjectplane->addComponent(std::move(renderComponentplane));
     //####### gameobject2
     auto gameObject2 = std::make_unique<GameObject>();
     gameObject2->getTransform().position.x = 37.0f;
@@ -49,8 +52,7 @@ int main(int argc, char* argv[])
         std::make_unique<RendererComponent>(&model, &texture);
 
     auto rotScript2 = std::make_unique<TScript>();
-    auto collider2 = std::make_unique<SphereCollider>();
-    collider2->setRadius(3.0f);
+    auto collider2 = std::make_unique<SphereCollider>(1.0f);
     gameObject2->addComponent(std::move(renderComponent2));
     gameObject2->addComponent(std::move(rotScript2));
     gameObject2->addComponent(std::move(collider2));
@@ -58,6 +60,7 @@ int main(int argc, char* argv[])
 
     scene.addGameObject(std::move(gameObject));
     scene.addGameObject(std::move(gameObject2));
+    scene.addGameObject(std::move(gameObjectplane));
 
   //  scene.addGameObject();
 

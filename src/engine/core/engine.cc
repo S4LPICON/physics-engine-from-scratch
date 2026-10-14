@@ -36,26 +36,53 @@ void Engine::init()
     }
 }
 
+#include <chrono>
+#include <iostream>
 
-void Engine::run(){
-    //verificar que haya una escena cargada
-    if (Engine::scene == nullptr)
+void Engine::run()
+{
+    if (scene == nullptr)
     {
         std::cerr << "[FATAL] no hay escena para cargar.\n";
         return;
     }
-    
+
+    using Clock = std::chrono::steady_clock;
+
+    auto lastFPSUpdate = Clock::now();
+    int frameCount = 0;
+
     while (processEvents())
     {
         Time::update();
         deltaTime = Time::deltaTime();
+
+        // Contador de FPS
+        frameCount++;
+
+        auto now = Clock::now();
+        auto elapsed = std::chrono::duration<float>(
+            now - lastFPSUpdate
+        ).count();
+
+        if (elapsed >= 1.0f)
+        {
+            std::cout << "FPS: "
+                      << frameCount / elapsed
+                      << '\n';
+
+            frameCount = 0;
+            lastFPSUpdate = now;
+        }
+
         clearFramebuffer(0xFFFFFFFF);
         clearZBuffer();
-        //physics pipeline (future)
-        //renderer pipeline
+
         detectCollisions(scene);
+
         startUpdateObjectsPipeline(*scene, deltaTime);
         startRenderScenePipeline(*scene, deltaTime);
+
         auto camera = scene->getModifiableCamera();
         tempCameraController(*camera, input, deltaTime);
 

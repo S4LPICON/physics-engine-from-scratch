@@ -2,7 +2,8 @@
 
 
 
-SphereCollider::SphereCollider(/* args */)
+SphereCollider::SphereCollider(float radius)
+    : radius(radius > 0.0f ? radius : 0.5f)
 {
 }
 
@@ -10,7 +11,12 @@ SphereCollider::~SphereCollider()
 {
 }
 
-void SphereCollider::setRadio(float radio)
+void SphereCollider::setRadius(float radius)
 {
-    this->radio = radio;
+    this->radius = radius;
+}
+
+float SphereCollider::getRadius() const
+{
+    return radius;
 }

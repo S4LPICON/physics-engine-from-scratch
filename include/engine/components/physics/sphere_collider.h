@@ -5,10 +5,10 @@
 class SphereCollider : public ColliderComponent
 {
 private:
-    float radio;
+    float radius;
 public:
-    SphereCollider(/* args */);
+    SphereCollider(float radius);
     ~SphereCollider();
-
-    void setRadio(float radio);
+    float getRadius() const;
+    void setRadius(float radius);
 };
