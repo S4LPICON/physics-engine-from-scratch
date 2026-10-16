@@ -1,6 +1,10 @@
 # Physics Engine From Scratch
 
 <p align="center">
+  <img src="docs/images/engine-showcase.png" width="690" alt="Engine showcase" />
+</p>
+
+<p align="center">
   <strong>A lightweight 3D game engine built from scratch in C++.</strong>
   <br />
   Building a usable foundation for 3D games through custom rendering, engine architecture, and physics.
