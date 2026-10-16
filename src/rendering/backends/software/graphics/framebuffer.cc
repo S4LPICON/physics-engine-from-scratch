@@ -1,6 +1,6 @@
-
 #include <limits>
-#include <iostream>
+#include <algorithm>
+#include <cstdint>
 
 #include "rendering/backends/software/graphics/framebuffer.h"
 
@@ -9,16 +9,20 @@ float zbuffer[WIDTH * HEIGHT];
 
 void clearFramebuffer(uint32_t color)
 {
-    for (int i = 0; i < WIDTH * HEIGHT; i++)
-    {
-        framebuffer[i] = color;
-        zbuffer[i] = std::numeric_limits<float>::infinity();
-    }
+    std::fill(
+        framebuffer,
+        framebuffer + (WIDTH * HEIGHT),
+        color
+    );
 }
 
 void clearZBuffer()
 {
-    std::fill(zbuffer, zbuffer + (WIDTH * HEIGHT), 1000.0f);
+    std::fill(
+        zbuffer,
+        zbuffer + (WIDTH * HEIGHT),
+        std::numeric_limits<float>::infinity()
+    );
 }
 
 void drawPixel(int x, int y, uint32_t color)

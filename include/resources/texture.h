@@ -12,20 +12,17 @@ struct Texture {
     std::vector<uint32_t> pixels;
 
     uint32_t sample(float u, float v) const {
-        if (pixels.empty()) return 0xFFFFFFFF;
+        if (pixels.empty() || width <= 0 || height <= 0)
+            return 0xFFFFFFFF;
 
         u = std::clamp(u, 0.0f, 1.0f);
         v = std::clamp(v, 0.0f, 1.0f);
 
-        // se mapea al centro exacto del texel
-        float texXf = u * static_cast<float>(width) - 0.5f;
-        float texYf = (1.0f - v) * static_cast<float>(height) - 0.5f;
-
-        int x = std::clamp(static_cast<int>(std::floor(texXf + 0.5f)), 0, width - 1);
-        int y = std::clamp(static_cast<int>(std::floor(texYf + 0.5f)), 0, height - 1);
+        const int x = std::min(static_cast<int>(u * width), width - 1);
+        const int y = std::min(static_cast<int>((1.0f - v) * height), height - 1);
 
         return pixels[y * width + x];
     }
 };
 
-#endif
+#endif 
