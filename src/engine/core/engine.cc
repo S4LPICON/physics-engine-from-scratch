@@ -1,13 +1,15 @@
+#include <cmath>
 #include <iostream>
+#include <utility>
 
 #include "rendering/backends/software/software_renderer.h"
 
 #include "engine/core/engine.h"
+#include "engine/core/debug/profiler.h"
 #include "engine/events/events.h"
 #include "engine/time/s4time.h"
 #include "engine/pipelines/renderer_pipeline.h"
 #include "engine/pipelines/object_update_pipeline.h"
-
 #include "engine/physics/CollisionSystem.h"
 
 Engine::Engine(){}
@@ -15,6 +17,26 @@ Engine::~Engine(){}
 
 const int MOVE_SPEED = 10;
 const int ROTATION_SPEED = 10;
+
+template <typename Function>
+    void measureIfEnabled(
+        Profiler& profiler,
+        bool enabled,
+        Profiler::Stage stage,
+        Function&& function)
+    {
+        if (enabled)
+        {
+            profiler.measure(
+                stage,
+                std::forward<Function>(function)
+            );
+        }
+        else
+        {
+            std::forward<Function>(function)();
+        }
+}
 
 
 void Engine::init()
@@ -36,9 +58,6 @@ void Engine::init()
     }
 }
 
-#include <chrono>
-#include <iostream>
-
 void Engine::run()
 {
     if (scene == nullptr)
@@ -47,49 +66,123 @@ void Engine::run()
         return;
     }
 
-    using Clock = std::chrono::steady_clock;
+    Profiler profiler;
 
-    auto lastFPSUpdate = Clock::now();
-    int frameCount = 0;
+    bool f3WasDown = false;
 
     while (processEvents())
     {
         Time::update();
         deltaTime = Time::deltaTime();
 
-        // Contador de FPS
-        frameCount++;
+        // toggle profiler -> F3
+        const bool f3IsDown = input.isKeyDown(Key::F3);
 
-        auto now = Clock::now();
-        auto elapsed = std::chrono::duration<float>(
-            now - lastFPSUpdate
-        ).count();
-
-        if (elapsed >= 1.0f)
+        if (f3IsDown && !f3WasDown)
         {
-            std::cout << "FPS: "
-                      << frameCount / elapsed
-                      << '\n';
+            profilerEnabled = !profilerEnabled;
 
-            frameCount = 0;
-            lastFPSUpdate = now;
+            std::cout << "[Profiler] "
+                      << (profilerEnabled ? "ACTIVADO" : "DESACTIVADO")
+                      << '\n';
         }
 
-        clearFramebuffer(0xFFFFFFFF);
-        clearZBuffer();
+        f3WasDown = f3IsDown;
 
-        detectCollisions(scene);
+        measureIfEnabled(
+            profiler,
+            profilerEnabled,
+            Profiler::Stage::FrameTotal,
+            [&]()
+            {
+                measureIfEnabled(
+                    profiler, profilerEnabled,
+                    Profiler::Stage::ClearFramebuffer,
+                    [&]()
+                    {
+                        clearFramebuffer(0xFFFFFFFF);
+                    }
+                );
 
-        startUpdateObjectsPipeline(*scene, deltaTime);
-        startRenderScenePipeline(*scene, deltaTime);
+                measureIfEnabled(
+                    profiler, profilerEnabled,
+                    Profiler::Stage::ClearZBuffer,
+                    [&]()
+                    {
+                        clearZBuffer();
+                    }
+                );
 
-        auto camera = scene->getModifiableCamera();
-        tempCameraController(*camera, input, deltaTime);
+                measureIfEnabled(
+                    profiler, profilerEnabled,
+                    Profiler::Stage::Collisions,
+                    [&]()
+                    {
+                        detectCollisions(scene);
+                    }
+                );
 
-        updateTexture(texture, framebuffer);
-        drawFramebuffer(renderer, texture);
+                measureIfEnabled(
+                    profiler, profilerEnabled,
+                    Profiler::Stage::UpdatePipeline,
+                    [&]()
+                    {
+                        startUpdateObjectsPipeline(*scene, deltaTime);
+                    }
+                );
+
+                measureIfEnabled(
+                    profiler, profilerEnabled,
+                    Profiler::Stage::RenderPipeline,
+                    [&]()
+                    {
+                        startRenderScenePipeline(*scene, deltaTime);
+                    }
+                );
+
+                measureIfEnabled(
+                    profiler, profilerEnabled,
+                    Profiler::Stage::CameraController,
+                    [&]()
+                    {
+                        auto camera = scene->getModifiableCamera();
+
+                        if (camera != nullptr)
+                        {
+                            tempCameraController(
+                                *camera, input, deltaTime
+                            );
+                        }
+                    }
+                );
+
+                measureIfEnabled(
+                    profiler, profilerEnabled,
+                    Profiler::Stage::SDLUpload,
+                    [&]()
+                    {
+                        updateTexture(texture, framebuffer);
+                    }
+                );
+
+                measureIfEnabled(
+                    profiler, profilerEnabled,
+                    Profiler::Stage::SDLPresent,
+                    [&]()
+                    {
+                        drawFramebuffer(renderer, texture);
+                    }
+                );
+            }
+        );
+
+        if (profilerEnabled)
+        {
+            profiler.endFrame();
+        }
     }
 }
+
 
 #include <cmath>
 

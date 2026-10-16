@@ -22,6 +22,8 @@ private:
     float deltaTime;
 
     Scene* scene;
+    
+    bool profilerEnabled = false;
 
 public:
     Engine(/* args */);
