@@ -2,6 +2,8 @@
 
 #include <cmath>
 
+#include "rendering/backends/software/graphics/framebuffer.h"
+
 namespace {
 
 constexpr float PI = 3.14159265358979323846f;
@@ -19,7 +21,7 @@ Camera::Camera()
     : position{0.0f, 0.0f, 0.0f}
     , rotation{0.0f, 0.0f, 0.0f}
     , fov{70.0f}
-    , aspectRatio{640.0f / 448.0f}
+    , aspectRatio{WIDTH / HEIGHT}
     , nearPlane{0.1f}
     , farPlane{1000.0f}
 {
