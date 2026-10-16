@@ -14,8 +14,8 @@ int main(int argc, char* argv[])
     Mesh model = OBJLoader::load("assets/models/sphere.obj");
     Texture texture = TextureLoader::load("assets/models/sphere.png");
 
-    Mesh model2 = OBJLoader::load("assets/models/asd.obj");
-    Texture texture2 = TextureLoader::load("assets/models/asd.png");
+    Mesh model2 = OBJLoader::load("assets/test/platform.obj");
+    Texture texture2 = TextureLoader::load("assets/test/texture.png");
 
     // camera
     Camera camera;
@@ -25,7 +25,7 @@ int main(int argc, char* argv[])
 
     //###gameobject1
     auto gameObject = std::make_unique<GameObject>();
-
+    gameObject->getTransform().position.y = 3.0f;
     //gameObject->getTransform().scale = {30.0f, 2.0f, 30.0f};
 
     auto renderComponent =
@@ -43,7 +43,7 @@ int main(int argc, char* argv[])
   //  );
 
     gameObject->addComponent(std::move(renderComponent));
-    gameObject->addComponent(std::move(rotScript));
+    //gameObject->addComponent(std::move(rotScript));
     gameObject->addComponent(std::move(collider));
     gameObject->addComponent(std::move(testcollisionsscript));
 
@@ -58,7 +58,9 @@ int main(int argc, char* argv[])
 
     //####### gameobject2
     auto gameObject2 = std::make_unique<GameObject>();
-    gameObject2->getTransform().position.x = 37.0f;
+    gameObject2->getTransform().position.x = 2.0f;
+    gameObject2->getTransform().position.z = 5.0f;
+    gameObject2->getTransform().position.y = 2.0f;
 
     auto renderComponent2 =
         std::make_unique<RendererComponent>(&model, &texture);
@@ -68,7 +70,7 @@ int main(int argc, char* argv[])
         Vec3{1.0f, 1.0f, 1.0f}
     );
     gameObject2->addComponent(std::move(renderComponent2));
-    gameObject2->addComponent(std::move(rotScript2));
+    //gameObject2->addComponent(std::move(rotScript2));
     gameObject2->addComponent(std::move(collider2));
     //----------------------------------
 

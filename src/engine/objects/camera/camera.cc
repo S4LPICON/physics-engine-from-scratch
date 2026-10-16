@@ -21,7 +21,7 @@ Camera::Camera()
     : position{0.0f, 0.0f, 0.0f}
     , rotation{0.0f, 0.0f, 0.0f}
     , fov{70.0f}
-    , aspectRatio{WIDTH / HEIGHT}
+    , aspectRatio{1280.0f / 720.0f}
     , nearPlane{0.1f}
     , farPlane{1000.0f}
 {
