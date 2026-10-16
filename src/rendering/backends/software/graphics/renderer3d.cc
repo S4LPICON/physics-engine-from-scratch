@@ -68,7 +68,76 @@ namespace {
 
 }
 
+// un bounding box (box collider)
+void renderDebugBox(
+    const Vec3& center,
+    const Vec3& size,
+    const Camera& camera,
+    uint32_t color)
+{
+    if (size.x <= 0.0f ||
+        size.y <= 0.0f ||
+        size.z <= 0.0f)
+    {
+        return;
+    }
 
+    const Mat4 viewProjection =
+        camera.getProjectionMatrix() *
+        camera.getViewMatrix();
+
+    const Vec3 half{
+        size.x * 0.5f,
+        size.y * 0.5f,
+        size.z * 0.5f
+    };
+
+    const Vec3 vertices[8] = {
+        {center.x - half.x, center.y - half.y, center.z - half.z},
+        {center.x + half.x, center.y - half.y, center.z - half.z},
+        {center.x + half.x, center.y + half.y, center.z - half.z},
+        {center.x - half.x, center.y + half.y, center.z - half.z},
+
+        {center.x - half.x, center.y - half.y, center.z + half.z},
+        {center.x + half.x, center.y - half.y, center.z + half.z},
+        {center.x + half.x, center.y + half.y, center.z + half.z},
+        {center.x - half.x, center.y + half.y, center.z + half.z}
+    };
+
+    constexpr int edges[12][2] = {
+        {0, 1}, {1, 2}, {2, 3}, {3, 0},
+        {4, 5}, {5, 6}, {6, 7}, {7, 4},
+        {0, 4}, {1, 5}, {2, 6}, {3, 7}
+    };
+
+    Point3D projected[8];
+    bool visible[8];
+
+    for (int i = 0; i < 8; ++i)
+    {
+        visible[i] = projectWorldPoint(
+            vertices[i],
+            viewProjection,
+            camera,
+            projected[i]
+        );
+    }
+
+    for (const auto& edge : edges)
+    {
+        const int a = edge[0];
+        const int b = edge[1];
+
+        if (!visible[a] || !visible[b])
+        {
+            continue;
+        }
+
+        drawLine(projected[a], projected[b], color);
+    }
+}
+
+//la esfera de un sphere collider
 void renderDebugSphere(
     const Vec3& center,
     float radius,
@@ -85,8 +154,6 @@ void renderDebugSphere(
         camera.getProjectionMatrix() *
         camera.getViewMatrix();
 
-    // Dibuja una circunferencia en cada uno de los
-    // tres planos: XY, XZ e YZ.
     for (int plane = 0; plane < 3; ++plane)
     {
         for (int i = 0; i < SEGMENTS; ++i)

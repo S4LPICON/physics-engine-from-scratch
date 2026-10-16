@@ -13,3 +13,8 @@ void renderDebugSphere(
     const Camera& camera,
     uint32_t color
 );
+void renderDebugBox(
+    const Vec3& center,
+    const Vec3& size,
+    const Camera& camera,
+    uint32_t color);
