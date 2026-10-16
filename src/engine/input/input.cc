@@ -20,6 +20,7 @@ SDL_Scancode Input::toSDLScancode(Key key) const {
         case Key::Right:   return SDL_SCANCODE_RIGHT;
         case Key::Down:   return SDL_SCANCODE_DOWN;
         case Key::Shift:   return SDL_SCANCODE_LSHIFT;
+        case Key::F3:     return SDL_SCANCODE_F3;
     }
 
     return SDL_SCANCODE_UNKNOWN;

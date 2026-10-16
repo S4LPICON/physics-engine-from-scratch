@@ -14,7 +14,8 @@ enum class Key {
     Right,
     Up,
     Down,
-    Shift
+    Shift,
+    F3
 };
 
 class Input {
