@@ -23,7 +23,7 @@ The project is developed progressively, starting from low-level mathematics and 
 * [x] Pixel rendering
 * [x] Line rasterization
 * [x] Circle rasterization
-* [ ] Rectangle rasterization
+* [x] Rectangle rasterization
 * [x] Triangle rasterization
 * [x] Triangle interpolation
 * [ ] Alpha blending
@@ -60,11 +60,11 @@ The project is developed progressively, starting from low-level mathematics and 
 
 ### Collision Detection
 
-* [ ] AABB
+* [x] AABB
 * [x] Circle
-* [ ] AABB vs AABB
+* [x] AABB vs AABB
 * [x] Circle vs Circle
-* [ ] Circle vs AABB
+* [x] Circle vs AABB
 * [ ] Collision normals
 * [ ] Penetration depth
 * [ ] Contact points
@@ -95,7 +95,7 @@ The project is developed progressively, starting from low-level mathematics and 
 * [ ] Static platforms
 * [ ] Gravity controls
 * [ ] Physics debugging
-* [ ] Collider visualization
+* [x] Collider visualization
 * [ ] Contact visualization
 * [ ] Velocity visualization
 * [ ] Pause / resume
@@ -106,14 +106,14 @@ The project is developed progressively, starting from low-level mathematics and 
 
 * [ ] Application
 * [ ] Game loop
-* [ ] Input system
-* [ ] Time system
+* [x] Input system (early)
+* [x] Time system (early)
 * [ ] Logging
-* [ ] Scene
-* [ ] Entity
-* [ ] Transform
-* [ ] Component system
-* [ ] Camera
+* [x] Scene
+* [x] GameObject
+* [x] Transform
+* [x] Component system (early)
+* [x] Camera
 * [ ] Resource management
 
 ## Phase 6 — GPU Rendering
@@ -145,8 +145,8 @@ The project is developed progressively, starting from low-level mathematics and 
 ## Phase 8 — Physics 3D
 
 * [ ] 3D rigid bodies
-* [ ] Sphere collider
-* [ ] Box collider
+* [x] Sphere collider
+* [x] Box collider
 * [ ] Plane collider
 * [ ] Capsule collider
 * [ ] Broad phase
@@ -161,14 +161,14 @@ The project is developed progressively, starting from low-level mathematics and 
 ## Phase 9 — Assets & Engine Tools
 
 * [ ] Asset manager
-* [ ] Model loading
-* [ ] Texture loading
+* [x] Model loading
+* [x] Texture loading
 * [ ] Material loading
 * [ ] Shader management
 * [ ] Scene serialization
 * [ ] Debug renderer
 * [ ] Physics debug renderer
-* [ ] Profiler
+* [x] Profiler
 * [ ] Frame statistics
 
 ## Phase 10 — Audio & Game Systems
